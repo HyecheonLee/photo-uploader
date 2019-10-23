@@ -37,7 +37,7 @@ public class UserService {
     @GraphQLMutation(name = "createAccount")
     public User createAccount(@Valid CreateUser createUser, BindingResult result) {
         final var user = createUser.toUser();
-        emailService.sendSecretMail(user.getEmail(), "");
+        emailService.sendSecretMail("rainbow880616@gmail.com", "");
         return userRepository.save(user);
     }
 }
