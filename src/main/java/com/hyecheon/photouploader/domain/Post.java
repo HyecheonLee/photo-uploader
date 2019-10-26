@@ -40,4 +40,8 @@ public class Post {
     @OneToMany(mappedBy = "post", fetch = FetchType.LAZY)
     private List<Comment> comments = new ArrayList<>();
 
+    @GraphQLQuery(name = "likeCount")
+    public int getLikeCount() {
+        return likes.size();
+    }
 }

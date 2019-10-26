@@ -28,4 +28,12 @@ public class Comment {
     @GraphQLQuery
     @ManyToOne(fetch = FetchType.LAZY)
     private Post post;
+
+    public static Comment createComment(String text, User user, Post post) {
+        final var comment = new Comment();
+        comment.text = text;
+        comment.user = user;
+        comment.post = post;
+        return comment;
+    }
 }

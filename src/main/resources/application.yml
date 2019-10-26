@@ -16,6 +16,7 @@ spring:
         dialect: org.hibernate.dialect.MySQL8Dialect
         show_sql: true
         format_sql: true
+    open-in-view: true
   mail:
     host: smtp.sendgrid.net
     port: 587

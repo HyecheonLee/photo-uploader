@@ -25,4 +25,9 @@ public class Like {
     @GraphQLQuery
     @ManyToOne(fetch = FetchType.LAZY)
     private Post post;
+
+    public Like(User user, Post post) {
+        this.user = user;
+        this.post = post;
+    }
 }
