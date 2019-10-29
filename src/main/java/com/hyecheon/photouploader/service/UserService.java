@@ -86,7 +86,7 @@ public class UserService {
     @Transactional
     @GraphQLMutation(name = "editUser")
     public User editUser(String username, String email, String firstName, String lastName, String bio) {
-        final var loginUser = userDetailsService.getLoginUser();
+        final var loginUser = userDetailsService.getLoginUserWithInfo();
 
         if (StringUtils.hasText(username)) {
             loginUser.setUsername(username);
@@ -113,7 +113,8 @@ public class UserService {
 
     @GraphQLQuery(name = "me")
     public User me() {
-        return userDetailsService.getLoginUser();
+        return userDetailsService.getLoginUserWithInfo();
     }
+
 
 }

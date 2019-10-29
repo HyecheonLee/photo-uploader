@@ -9,7 +9,6 @@ import io.leangen.graphql.annotations.GraphQLContext;
 import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.spqr.spring.annotations.GraphQLApi;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -18,29 +17,30 @@ import org.springframework.stereotype.Service;
 public class LikeService {
     private final LikeRepository likeRepository;
     private final PostRepository postRepository;
+    private final LoginUserService loginUserService;
 
     @GraphQLQuery(name = "toggleLike")
     public boolean getToggleLike(Long postId) {
-        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        final var optionalPost = postRepository.findById(postId);
-        if (optionalPost.isPresent()) {
-            final var post = optionalPost.get();
-            final var optionalLike = likeRepository.findByUserAndPost(user, post);
-            if (optionalLike.isPresent()) {
-                likeRepository.delete(optionalLike.get());
-                return false;
-            } else {
-                final var like = new Like(user, post);
-                likeRepository.save(like);
-                return true;
-            }
+        User user = loginUserService.getLoginUser();
+        final var post = postRepository.findById(postId).orElseThrow(() -> new RuntimeException("id error"));
+        final var optionalLike = likeRepository.findByUserAndPost(user, post);
+        if (optionalLike.isPresent()) {
+            likeRepository.delete(optionalLike.get());
+            return false;
+        } else {
+            final var like = new Like(user, post);
+            likeRepository.save(like);
+            return true;
         }
-        return false;
     }
 
     @GraphQLQuery(name = "isLiked")
     public boolean isLiked(@GraphQLContext Post post) {
-        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        return likeRepository.existsByUserAndPost(user, post);
+        return likeRepository.existsByUserAndPost(loginUserService.getLoginUser(), post);
+    }
+
+    @GraphQLQuery(name = "likeCount")
+    public int likeCount(@GraphQLContext Post post) {
+        return likeRepository.countLikeByPost(post);
     }
 }

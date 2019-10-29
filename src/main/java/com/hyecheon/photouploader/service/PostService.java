@@ -1,21 +1,19 @@
 package com.hyecheon.photouploader.service;
 
-import com.hyecheon.photouploader.domain.File;
-import com.hyecheon.photouploader.domain.Like;
 import com.hyecheon.photouploader.domain.Post;
 import com.hyecheon.photouploader.domain.User;
 import com.hyecheon.photouploader.repository.PostRepository;
-import com.hyecheon.photouploader.repository.UserRepository;
-import io.leangen.graphql.annotations.GraphQLContext;
 import io.leangen.graphql.annotations.GraphQLMutation;
 import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.spqr.spring.annotations.GraphQLApi;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collection;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -44,5 +42,42 @@ public class PostService {
         final var post = Post.createPost(caption, loginUser, files);
         postRepository.save(post);
         return post;
+    }
+
+    @Transactional
+    @GraphQLMutation(name = "editPost")
+    public Post editPost(Long id, String caption, String location) {
+        final var post = postRepository.findById(id).orElseThrow(() -> new RuntimeException("id error"));
+        final var loginUser = loginUserService.getLoginUserWithInfo();
+        if (post.getUser().equals(loginUser)) {
+            post.setCaption(caption);
+            post.setLocation(location);
+            return post;
+        } else {
+            throw new RuntimeException("you can't do edit");
+        }
+    }
+
+    @Transactional
+    @GraphQLMutation(name = "deletePost")
+    public boolean deletePost(Long id) {
+        final var post = postRepository.findById(id).orElseThrow(() -> new RuntimeException("id error"));
+        final var loginUser = loginUserService.getLoginUserWithInfo();
+        if (post.getUser().equals(loginUser)) {
+            postRepository.delete(post);
+            return true;
+        } else {
+            throw new RuntimeException("you can't do delete");
+        }
+    }
+
+    @GraphQLQuery(name = "seeFeed")
+    public List<Post> seeFeed() {
+        final var loginUser = loginUserService.getLoginUserWithInfo();
+        final var following = loginUser.getFollowing();
+        return following.stream().map(User::getPosts)
+                .flatMap(Collection::stream)
+                .sorted(Comparator.comparing(Post::getUpdatedAt))
+                .collect(Collectors.toList());
     }
 }

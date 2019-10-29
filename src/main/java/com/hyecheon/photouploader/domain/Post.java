@@ -4,8 +4,11 @@ import io.leangen.graphql.annotations.GraphQLQuery;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import javax.persistence.*;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -15,7 +18,6 @@ import java.util.stream.Collectors;
 @Setter
 @NoArgsConstructor
 public class Post {
-
     @GraphQLQuery
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -34,17 +36,19 @@ public class Post {
     private List<File> files = new ArrayList<>();
 
     @GraphQLQuery
-    @OneToMany(mappedBy = "post", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "post", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Like> likes = new ArrayList<>();
 
     @GraphQLQuery
-    @OneToMany(mappedBy = "post", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "post", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Comment> comments = new ArrayList<>();
 
-    @GraphQLQuery(name = "likeCount")
-    public int getLikeCount() {
-        return likes.size();
-    }
+    @CreationTimestamp
+    @Column(updatable = false)
+    private LocalDateTime createAt;
+
+    @UpdateTimestamp
+    private LocalDateTime updatedAt;
 
     public static Post createPost(String caption, User user) {
         final var post = new Post();

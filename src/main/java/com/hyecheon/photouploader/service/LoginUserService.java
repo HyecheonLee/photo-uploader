@@ -30,6 +30,10 @@ public class LoginUserService implements UserDetailsService {
     }
 
     public User getLoginUser() {
+        return (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    }
+
+    public User getLoginUserWithInfo() {
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         return userRepository.findById(user.getId()).orElseThrow(() -> new RuntimeException("id error"));
     }
