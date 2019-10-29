@@ -1,7 +1,7 @@
 package com.hyecheon.photouploader.security;
 
 import com.hyecheon.photouploader.domain.User;
-import com.hyecheon.photouploader.service.CustomUserDetailsService;
+import com.hyecheon.photouploader.service.LoginUserService;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -24,7 +24,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     @Autowired
     private JwtTokenProvider jwtTokenProvider;
     @Autowired
-    private CustomUserDetailsService customUserDetailsService;
+    private LoginUserService loginUserService;
 
     @Override
     protected void doFilterInternal(@NotNull HttpServletRequest httpServletRequest,
@@ -34,7 +34,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             String jwt = getJwtFromRequest(httpServletRequest);
             if (StringUtils.hasText(jwt) && jwtTokenProvider.validateToken(jwt)) {
                 final Long userIdFromJWT = jwtTokenProvider.getUserIdFromJWT(jwt);
-                final User userDetails = customUserDetailsService.loadUserById(userIdFromJWT);
+                final User userDetails = loginUserService.loadUserById(userIdFromJWT);
                 final UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(userDetails, null, Collections.emptyList());
                 authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(httpServletRequest));
                 SecurityContextHolder.getContext().setAuthentication(authentication);

@@ -19,9 +19,17 @@ public class File {
     private Long id;
 
     @GraphQLQuery
+    @Column(columnDefinition = "TEXT")
     private String url;
 
     @GraphQLQuery
     @ManyToOne
     private Post post;
+
+    public static File createFile(String url, Post post) {
+        final var file = new File();
+        file.url = url;
+        file.post = post;
+        return file;
+    }
 }

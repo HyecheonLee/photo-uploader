@@ -2,6 +2,7 @@ package com.hyecheon.photouploader.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.hyecheon.photouploader.dto.CreateUser;
+import io.leangen.graphql.annotations.GraphQLIgnore;
 import io.leangen.graphql.annotations.GraphQLQuery;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -33,6 +34,7 @@ public class User implements UserDetails {
     @GraphQLQuery
     private String email;
 
+    @GraphQLIgnore
     private String password;
 
     @Setter
@@ -67,6 +69,11 @@ public class User implements UserDetails {
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
     private List<Comment> comments = new ArrayList<>();
 
+    @GraphQLQuery(name = "fullName")
+    public String getFullName() {
+        return this.firstName + " " + this.lastName;
+    }
+
     public void addFollowingUser(User user) {
         following.add(user);
     }
@@ -88,31 +95,31 @@ public class User implements UserDetails {
     /*
      * UserDetails interface methods
      * */
-    @JsonIgnore
+    @GraphQLIgnore
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return null;
     }
 
-    @JsonIgnore
+    @GraphQLIgnore
     @Override
     public boolean isAccountNonExpired() {
         return true;
     }
 
-    @JsonIgnore
+    @GraphQLIgnore
     @Override
     public boolean isAccountNonLocked() {
         return true;
     }
 
-    @JsonIgnore
+    @GraphQLIgnore
     @Override
     public boolean isCredentialsNonExpired() {
         return true;
     }
 
-    @JsonIgnore
+    @GraphQLIgnore
     @Override
     public boolean isEnabled() {
         return true;

@@ -3,6 +3,7 @@ package com.hyecheon.photouploader.service;
 import com.hyecheon.photouploader.domain.User;
 import com.hyecheon.photouploader.dto.CreateUser;
 import com.hyecheon.photouploader.repository.UserRepository;
+import io.leangen.graphql.annotations.GraphQLContext;
 import io.leangen.graphql.annotations.GraphQLMutation;
 import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.spqr.spring.annotations.GraphQLApi;
@@ -24,10 +25,17 @@ import java.util.Optional;
 public class UserService {
     private final UserRepository userRepository;
     private final EmailService emailService;
+    private final LoginUserService userDetailsService;
 
-    @GraphQLQuery(name = "allUsers")
-    public List<User> getUsers(User user) {
+    @GraphQLQuery(name = "users")
+    public List<User> getUsers() {
         return userRepository.findAll();
+    }
+
+    @GraphQLQuery(name = "isFollowing")
+    public boolean isFollowing(@GraphQLContext User followingUser) {
+        final var loginUser = userDetailsService.getLoginUser();
+        return loginUser.getFollowing().contains(followingUser);
     }
 
     @GraphQLQuery(name = "userById")
@@ -78,7 +86,7 @@ public class UserService {
     @Transactional
     @GraphQLMutation(name = "editUser")
     public User editUser(String username, String email, String firstName, String lastName, String bio) {
-        final var loginUser = getLoginUser();
+        final var loginUser = userDetailsService.getLoginUser();
 
         if (StringUtils.hasText(username)) {
             loginUser.setUsername(username);
@@ -105,11 +113,7 @@ public class UserService {
 
     @GraphQLQuery(name = "me")
     public User me() {
-        return getLoginUser();
+        return userDetailsService.getLoginUser();
     }
 
-    private User getLoginUser() {
-        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        return userRepository.findById(user.getId()).orElseThrow(() -> new RuntimeException("id error"));
-    }
 }

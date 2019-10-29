@@ -5,13 +5,12 @@ import com.hyecheon.photouploader.domain.Post;
 import com.hyecheon.photouploader.domain.User;
 import com.hyecheon.photouploader.repository.LikeRepository;
 import com.hyecheon.photouploader.repository.PostRepository;
+import io.leangen.graphql.annotations.GraphQLContext;
 import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.spqr.spring.annotations.GraphQLApi;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
-
-import java.util.Optional;
 
 @Service
 @GraphQLApi
@@ -37,5 +36,11 @@ public class LikeService {
             }
         }
         return false;
+    }
+
+    @GraphQLQuery(name = "isLiked")
+    public boolean isLiked(@GraphQLContext Post post) {
+        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        return likeRepository.existsByUserAndPost(user, post);
     }
 }

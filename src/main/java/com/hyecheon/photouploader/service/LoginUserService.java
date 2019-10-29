@@ -3,6 +3,7 @@ package com.hyecheon.photouploader.service;
 import com.hyecheon.photouploader.domain.User;
 import com.hyecheon.photouploader.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -11,9 +12,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
+@Transactional
 @RequiredArgsConstructor
 @Service
-public class CustomUserDetailsService implements UserDetailsService {
+public class LoginUserService implements UserDetailsService {
     private final UserRepository userRepository;
 
     @Override
@@ -22,10 +24,13 @@ public class CustomUserDetailsService implements UserDetailsService {
         return user.orElseThrow(() -> new UsernameNotFoundException("User not found"));
     }
 
-    @Transactional
     public User loadUserById(Long id) {
         final Optional<User> user = userRepository.findById(id);
         return user.orElseThrow(() -> new UsernameNotFoundException("User not found"));
     }
 
+    public User getLoginUser() {
+        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        return userRepository.findById(user.getId()).orElseThrow(() -> new RuntimeException("id error"));
+    }
 }

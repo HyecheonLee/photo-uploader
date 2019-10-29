@@ -10,4 +10,6 @@ public interface PostRepository extends JpaRepository<Post, Long> {
 
     @Query("select p from Post p  join fetch p.user u where p.caption like %:term% or p.location like %:term%")
     public List<Post> findByTerm(String term);
+
+    Post findByCaption(String caption);
 }

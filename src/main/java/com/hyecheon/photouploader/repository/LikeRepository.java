@@ -14,4 +14,6 @@ public interface LikeRepository extends JpaRepository<Like, Long> {
     public Optional<Like> findByUserIdAndPostId(@Param("userId") Long userId, @Param("postId") Long postId);
 
     public Optional<Like> findByUserAndPost(User user, Post post);
+
+    public boolean existsByUserAndPost(User user, Post post);
 }
